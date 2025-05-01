@@ -1,0 +1,15 @@
+#lang info
+
+(define collections "ollama")
+(define deps
+  '("base"
+    "ollama-lib"))
+(define build-deps
+  '("http-easy"
+    "http-easy-lib"
+    "racket-doc"
+    "scribble-lib"))
+(define implies
+  '("ollama-lib"))
+(define scribblings
+  '(("ollama-manual.scrbl")))
