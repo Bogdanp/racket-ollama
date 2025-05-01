@@ -3,7 +3,8 @@
 (require (for-syntax racket/base
                      syntax/parse/pre)
          struct-define
-         "json-schema.rkt")
+         "json-schema.rkt"
+         "json.rkt")
 
 (provide
  (all-from-out "json-schema.rkt")
@@ -34,16 +35,32 @@
     (pattern [label:id id:id : type:expr])))
 
 (define (do-call-tool tools data)
-  (let/ec esc
-    (define func (hash-ref data 'function))
-    (define name (string->symbol (hash-ref func 'name)))
-    (define arguments (hash-ref func 'arguments))
-    (struct-define tool-info (hash-ref tools name (λ () (esc (format "error: tool ~a does not exist." name)))))
-    (define arg-vals
-      (for/list ([arg (in-list args)])
-        (struct-define tool-arg-info arg)
-        (hash-ref arguments label (λ () (esc (format "error: tool '~a' requires '~a' as an argument." name label))))))
-    (apply proc arg-vals)))
+  (define func (hash-ref data 'function))
+  (define name-str (hash-ref func 'name))
+  (define name (string->symbol name-str))
+  (define res
+    (let/ec esc
+      (define arguments (hash-ref func 'arguments))
+      (define info
+        (hash-ref
+         #;ht tools
+         #;key name
+         #;failure-result
+         (lambda ()
+           (esc (format "error: tool ~a does not exist." name)))))
+      (struct-define tool-info info)
+      (define arg-vals
+        (for/list ([arg (in-list args)])
+          (struct-define tool-arg-info arg)
+          (hash-ref
+           #;ht arguments
+           #;key label
+           #;failure-result
+           (lambda ()
+             (esc (format "error: tool '~a' requires '~a' as an argument." name label))))))
+      (apply proc arg-vals)))
+  (jsexpr->string
+   (hash-set func 'result (->jsexpr res))))
 
 (define-syntax (define-tool-definer stx)
   (syntax-parse stx

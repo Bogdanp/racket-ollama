@@ -152,7 +152,7 @@ bindings documented here are subject to change.}
      'function
      (hasheq
       'name "get-temperature"
-      'arguments (hasheq 'location "USA"))))
+      'arguments (hasheq 'location "Los Angeles"))))
   ]
  }
 

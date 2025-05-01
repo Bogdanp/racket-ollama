@@ -50,7 +50,9 @@
     (define/generic recur ->jsexpr)
     (define (->jsexpr vs)
       (for/list ([v (in-mutable-treelist vs)])
-        (recur v)))]))
+        (recur v)))]
+   [path?
+    (define ->jsexpr path->string)]))
 
 (define-syntax (define-struct->jsexpr stx)
   (syntax-parse stx
