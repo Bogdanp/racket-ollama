@@ -7,6 +7,7 @@
  make-message)
 
 (struct message (role content images tool-calls)
+  #:transparent
   #:methods gen:to-jsexpr
   [(define-struct->jsexpr message)])
 
