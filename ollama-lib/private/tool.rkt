@@ -88,7 +88,7 @@
      (lambda ()
        (raise
         (exn:fail:tool:not-found
-         (format "tool '~a' does not exist")
+         (format "tool '~a' does not exist" name)
          (current-continuation-marks)
          #;call-data data)))))
   (struct-define tool-info info)
