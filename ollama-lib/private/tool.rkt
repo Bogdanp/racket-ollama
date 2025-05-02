@@ -14,7 +14,23 @@
  :
  Object
  define-tool-definer
- tools->jsexpr)
+ tools->jsexpr
+
+ current-call-data
+ (struct-out exn:fail:tool)
+ (struct-out exn:fail:tool:not-found)
+ (struct-out exn:fail:tool:call))
+
+(define current-call-data
+  (make-parameter #f))
+
+(struct exn:fail:tool exn:fail (call-data)
+  #:methods gen:to-jsexpr
+  [(define (->jsexpr e)
+     (struct-define exn:fail:tool e)
+     (hash-set call-data 'error (exn-message e)))])
+(struct exn:fail:tool:not-found exn:fail:tool ())
+(struct exn:fail:tool:call exn:fail:tool ())
 
 (define-syntax (: stx)
   (raise-syntax-error ': "may only be used within a define-tool or an Object form" stx))
@@ -33,34 +49,6 @@
     #:literals (:)
     (pattern [id:id : type:expr] #:attr label #'id)
     (pattern [label:id id:id : type:expr])))
-
-(define (do-call-tool tools data)
-  (define func (hash-ref data 'function))
-  (define name-str (hash-ref func 'name))
-  (define name (string->symbol name-str))
-  (define res
-    (let/ec esc
-      (define arguments (hash-ref func 'arguments))
-      (define info
-        (hash-ref
-         #;ht tools
-         #;key name
-         #;failure-result
-         (lambda ()
-           (esc (format "error: tool ~a does not exist." name)))))
-      (struct-define tool-info info)
-      (define arg-vals
-        (for/list ([arg (in-list args)])
-          (struct-define tool-arg-info arg)
-          (hash-ref
-           #;ht arguments
-           #;key label
-           #;failure-result
-           (lambda ()
-             (esc (format "error: tool '~a' requires '~a' as an argument." name label))))))
-      (apply proc arg-vals)))
-  (jsexpr->string
-   (hash-set func 'result (->jsexpr res))))
 
 (define-syntax (define-tool-definer stx)
   (syntax-parse stx
@@ -86,6 +74,42 @@
            (hash-copy tools))
          (define (call-tool data)
            (do-call-tool tools data)))]))
+
+(define (do-call-tool tools data)
+  (define func (hash-ref data 'function))
+  (define name-str (hash-ref func 'name))
+  (define name (string->symbol name-str))
+  (define arguments (hash-ref func 'arguments))
+  (define info
+    (hash-ref
+     #;ht tools
+     #;key name
+     #;failure-result
+     (lambda ()
+       (raise
+        (exn:fail:tool:not-found
+         (format "tool '~a' does not exist")
+         (current-continuation-marks)
+         #;call-data data)))))
+  (struct-define tool-info info)
+  (define arg-vals
+    (for/list ([arg (in-list args)])
+      (struct-define tool-arg-info arg)
+      (hash-ref
+       #;ht arguments
+       #;key label
+       #;failure-result
+       (lambda ()
+         (raise
+          (exn:fail:tool:call
+           (format "tool '~a' requires '~a' as an argument" name label)
+           (current-continuation-marks)
+           #;call-data data))))))
+  (define res
+    (parameterize ([current-call-data data])
+      (apply proc arg-vals)))
+  (jsexpr->string
+   (hash-set func 'result (->jsexpr res))))
 
 (define (tool->jsexpr t)
   (struct-define tool-info t)

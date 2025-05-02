@@ -117,11 +117,13 @@ bindings documented here are subject to change.}
            #:caller caller-id)]{
 
  Binds @racket[definer-id] as a definition form that declares
- @tech{tools}. Binds @racket[getter-id] to a procedure that
- returns a hash of all the tools that have been defined so far via
- @racket[definer-id]. Finally, binds @racket[caller-id] to a procedure
- that, given LLM tool call data, calls one of the defined procedures and
- returns response that can be
+ @tech{tools}.
+
+ Binds @racket[getter-id] to a procedure that returns a hash of all the
+ tools that have been defined so far via @racket[definer-id].
+
+ Binds @racket[caller-id] to a procedure that, given LLM tool call data,
+ calls one of the defined procedures and returns response that can be
  sent to the LLM.
 
  The syntax of @racket[define-id] is
@@ -138,6 +140,20 @@ bindings documented here are subject to change.}
   The procedure and its argument metadata is recorded in an internal
   registry so that all tools defined by @racket[define-id] can be
   retrieved at runtime and their metadata provided to an LLM.
+
+  @deftogether[(
+   @defproc[(Array [elem type]) type]
+   @defthing[#:kind "value" Boolean type]
+   @defproc[(Enum [option string?] ...+) type]
+   @defthing[#:kind "value" Null type]
+   @defthing[#:kind "value" Number type]
+   @defform[(Object [property : type] ...+)]
+   @defproc[(Optional [t type]) type]
+   @defproc[(Or [t type] ...+) type]
+   @defthing[#:kind "value" String type]
+  )]{
+   Tool arguments must declare one of these types.
+  }
 
   @examples[
    (require ollama)
@@ -156,17 +172,35 @@ bindings documented here are subject to change.}
   ]
  }
 
- @deftogether[(
-  @defproc[(Array [elem type]) type]
-  @defthing[#:kind "value" Boolean type]
-  @defproc[(Enum [option string?] ...+) type]
-  @defthing[#:kind "value" Null type]
-  @defthing[#:kind "value" Number type]
-  @defform[(Object [property : type] ...+)]
-  @defproc[(Optional [t type]) type]
-  @defproc[(Or [t type] ...+) type]
-  @defthing[#:kind "value" String type]
- )]{
-  Supported types for tool arguments.
- }
+ The @racket[caller-id] procedure raises a @racket[exn:fail:tool]
+ exception when a requested tool cannot be found or when it is called
+ incorrectly.
+}
+
+@deftogether[(
+ @defstruct[exn:fail:tool ([call-data jsexpr?])]
+ @defstruct[exn:fail:tool:not-found ()]
+ @defstruct[exn:fail:tool:call ()]
+)]{
+ The exceptions raised by a tool caller procedure on error. The
+ @racket[call-data] represents the original tool call JSON.
+
+ A tool error can be converted to JSON by applying @racket[->jsexpr] to
+ it. The conversion adds an @racket['error] key to the original call
+ data with the exception message.
+}
+
+@subsection{JSON}
+
+@defidform[#:kind "interface" gen:to-jsexpr]{
+ An interface for values that can be converted to JSON.
+}
+
+@defproc[(to-jsexpr? [v any/c]) boolean?]{
+ Returns @racket[#t] when @racket[v] implements @racket[gen:to-jsexpr].
+}
+
+@defproc[(->jsexpr [v to-jsexpr?]) jsexpr?]{
+ Converts @racket[v] to a @racket[jsexpr?], assuming @racket[v]
+ implements @racket[gen:to-jsexpr].
 }

@@ -14,8 +14,9 @@
 
 (provide
  (all-from-out json)
- ->jsexpr
  gen:to-jsexpr
+ to-jsexpr?
+ ->jsexpr
  define-struct->jsexpr)
 
 (define-generics to-jsexpr
