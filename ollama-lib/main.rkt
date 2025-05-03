@@ -40,10 +40,11 @@
  tool-info?
  define-tool-definer
  (all-from-out "private/json-schema.rkt")
- current-call-data
- (struct-out exn:fail:tool)
- (struct-out exn:fail:tool:not-found)
- (struct-out exn:fail:tool:call)
+
+ exn:fail:tool?
+ exn:fail:tool:not-found?
+ exn:fail:tool:call?
+ raise-tool-error
 
  gen:to-jsexpr
  to-jsexpr?

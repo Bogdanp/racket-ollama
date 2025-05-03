@@ -3,6 +3,7 @@
 (require (for-syntax racket/base
                      syntax/parse/pre)
          struct-define
+         threading
          "json-schema.rkt"
          "json.rkt")
 
@@ -16,7 +17,7 @@
  define-tool-definer
  tools->jsexpr
 
- current-call-data
+ raise-tool-error
  (struct-out exn:fail:tool)
  (struct-out exn:fail:tool:not-found)
  (struct-out exn:fail:tool:call))
@@ -24,13 +25,26 @@
 (define current-call-data
   (make-parameter #f))
 
-(struct exn:fail:tool exn:fail (call-data)
+(struct exn:fail:tool exn:fail (data hints)
   #:methods gen:to-jsexpr
   [(define (->jsexpr e)
      (struct-define exn:fail:tool e)
-     (hash-set call-data 'error (exn-message e)))])
+     (~> data
+         (hash-set 'error (exn-message e))
+         (hash-set 'hints hints)))])
 (struct exn:fail:tool:not-found exn:fail:tool ())
 (struct exn:fail:tool:call exn:fail:tool ())
+
+(define (raise-tool-error
+         #:hints [hints null]
+         #:data [data (current-call-data)]
+         message . args)
+  (raise
+   (exn:fail:tool:call
+    (apply format message args)
+    (current-continuation-marks)
+    #;data data
+    #;hints hints)))
 
 (define-syntax (: stx)
   (raise-syntax-error ': "may only be used within a define-tool or an Object form" stx))
@@ -90,7 +104,8 @@
         (exn:fail:tool:not-found
          (format "tool '~a' does not exist" name)
          (current-continuation-marks)
-         #;call-data data)))))
+         #;data data
+         #;hints '("check the tool list again and retry"))))))
   (struct-define tool-info info)
   (define arg-vals
     (for/list ([arg (in-list args)])
@@ -100,11 +115,10 @@
        #;key label
        #;failure-result
        (lambda ()
-         (raise
-          (exn:fail:tool:call
-           (format "tool '~a' requires '~a' as an argument" name label)
-           (current-continuation-marks)
-           #;call-data data))))))
+         (raise-tool-error
+          #:hints '("check the tool's schema again and retry")
+          #:data data
+          "tool '~a' requires '~a' as an argument" name label)))))
   (define res
     (parameterize ([current-call-data data])
       (apply proc arg-vals)))

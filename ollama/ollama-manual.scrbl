@@ -172,22 +172,28 @@ bindings documented here are subject to change.}
   ]
  }
 
- The @racket[caller-id] procedure raises a @racket[exn:fail:tool]
- exception when a requested tool cannot be found or when it is called
- incorrectly.
+ The @racket[caller-id] procedure raises an exception when a requested
+ tool cannot be found or when it is called incorrectly.
 }
 
 @deftogether[(
- @defstruct[exn:fail:tool ([call-data jsexpr?])]
- @defstruct[exn:fail:tool:not-found ()]
- @defstruct[exn:fail:tool:call ()]
+ @defproc[(exn:fail:tool? [v any/c]) boolean?]
+ @defproc[(exn:fail:tool:not-found? [v any/c]) boolean?]
+ @defproc[(exn:fail:tool:call? [v any/c]) boolean?]
 )]{
- The exceptions raised by a tool caller procedure on error. The
- @racket[call-data] represents the original tool call JSON.
+ Predicates for errors raised by tools.
 
  A tool error can be converted to JSON by applying @racket[->jsexpr] to
  it. The conversion adds an @racket['error] key to the original call
  data with the exception message.
+}
+
+@defproc[(raise-tool-error [format-string string?]
+                           [format-arg any/c] ...
+                           [#:hints hints (listof string?) null]) void?]{
+ Raise a tool error with the given format and hints. The
+ @racket[#:hints] argument can be used to provide a list of strings to
+ instruct the LLM on how to recover.
 }
 
 @subsection{JSON}
