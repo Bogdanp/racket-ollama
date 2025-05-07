@@ -132,8 +132,17 @@ bindings documented here are subject to change.}
   @defidform[:]
   @defform[#:literals (:)
            (define-id (tool-name [arg-id : type-expr] ...)
-             e ...+)]
- )]{
+             maybe-description
+             maybe-example
+             e ...+)
+           #:grammar
+           ([maybe-description
+             (code:line)
+             (code:line #:description description-expr)]
+            [maybe-example
+             (code:line)
+             (code:line #:example example-expr maybe-example)])]
+  )]{
 
   A @racket[define-id] form binds @racket[tool-name] as a Racket
   procedure with the given set of @racket[arg-id] positional arguments.

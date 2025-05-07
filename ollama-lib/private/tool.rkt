@@ -56,7 +56,7 @@
      #'(Object* (list (cons 'k t) ...))]))
 
 (struct tool-arg-info (id label type))
-(struct tool-info (id proc args))
+(struct tool-info (id description examples proc args))
 
 (begin-for-syntax
   (define-syntax-class arg
@@ -71,12 +71,17 @@
          (define tools (make-hasheq))
          (define-syntax (definer stx)
            (syntax-parse stx
-             [(_ (id:id arg:arg (... ...)) e ...+)
+             [(_ (id:id arg:arg (... ...))
+                 {~optional {~seq #:description description:expr}}
+                 {~seq #:example example:expr} (... ...)
+                 e ...+)
               #'(begin
                   (define (id arg.id (... ...)) e (... ...))
                   (define info
                     (tool-info
                      #;id 'id
+                     #;description (... {~? description "No description."})
+                     #;examples (... {~? (list example ...) ""})
                      #;proc id
                      #;args (list
                              (tool-arg-info
@@ -129,6 +134,8 @@
   (struct-define tool-info t)
   (hasheq
    'type "function"
+   'examples examples
+   'description description
    'function
    (hasheq
     'name (symbol->string id)

@@ -48,7 +48,8 @@
 
  gen:to-jsexpr
  to-jsexpr?
- ->jsexpr)
+ ->jsexpr
+ tools->jsexpr)
 
 (define chat-response/c
   (-> (or/c jsexpr? eof-object?)))
