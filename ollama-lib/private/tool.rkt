@@ -129,7 +129,7 @@
     (parameterize ([current-call-data data])
       (apply proc arg-vals)))
   (jsexpr->string
-   (hash-set func 'result (->jsexpr res))))
+   (hash-set data 'result (->jsexpr res))))
 
 (define (tool->jsexpr t)
   (struct-define tool-info t)
