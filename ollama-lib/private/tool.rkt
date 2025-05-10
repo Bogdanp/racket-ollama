@@ -2,6 +2,7 @@
 
 (require (for-syntax racket/base
                      syntax/parse/pre)
+         racket/port
          struct-define
          threading
          "json-schema.rkt"
@@ -134,7 +135,12 @@
   (struct-define tool-info t)
   (hasheq
    'type "function"
-   'examples examples
+   'examples (for/list ([example (in-list examples)])
+               (cond
+                 [(string? example) example]
+                 [else (call-with-output-string
+                        (lambda (out)
+                          (write example out)))]))
    'description description
    'function
    (hasheq
