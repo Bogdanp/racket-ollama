@@ -42,7 +42,7 @@ bindings documented here are subject to change.}
                             [#:format output-format (or/c #f string?) #f]
                             [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f]
                             [#:response->history-entry response-converter
-                             (-> jsexpr? (or/c string? jsexpr? message?))
+                             (-> jsexpr? (or/c jsexpr? message?))
                              (λ (data) (hash-ref data 'message))])
          (values
           chat-response/c

@@ -20,7 +20,8 @@
    (->* [ollama-client? string? (or/c string? message?)]
         [#:options jsexpr?
          #:format (or/c #f 'json jsexpr?)
-         #:tools (or/c #f (hash/c symbol? tool-info?))]
+         #:tools (or/c #f (hash/c symbol? tool-info?))
+         #:response->history-entry (-> jsexpr? (or/c jsexpr? message?))]
         (values
          chat-response/c
          chat-continuation/c))])
