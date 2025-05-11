@@ -17,7 +17,7 @@
          #:auth auth-procedure/c]
         ollama-client?)]
   [ollama-start-chat
-   (->* [ollama-client? string? (or/c string? message?)]
+   (->* [ollama-client? string? (or/c string? message? (listof (or/c string? message?)))]
         [#:options jsexpr?
          #:format (or/c #f 'json jsexpr?)
          #:tools (or/c #f (hash/c symbol? tool-info?))

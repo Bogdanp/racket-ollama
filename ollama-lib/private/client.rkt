@@ -42,9 +42,9 @@
             (make-message
              #:role 'assistant
              (&content data)))]
-         c model str-or-message)
+         c model str-or-messages)
   (struct-define ollama-client c)
-  (let loop ([messages (treelist (ensure-message str-or-message))]
+  (let loop ([messages (ensure-messages str-or-messages)]
              [output-format output-format]
              [tools tools])
     (define resp
@@ -99,6 +99,15 @@
   (if (message? str-or-message)
       str-or-message
       (make-message str-or-message)))
+
+(define (ensure-messages str-or-messages)
+  (cond
+    [(list? str-or-messages)
+     (apply treelist (map ensure-message str-or-messages))]
+    [(message? str-or-messages)
+     (treelist str-or-messages)]
+    [else
+     (treelist (make-message str-or-messages))]))
 
 (define (check-response who resp [ok '(200)])
   (begin0 resp

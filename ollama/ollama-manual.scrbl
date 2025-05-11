@@ -37,7 +37,7 @@ bindings documented here are subject to change.}
 
 @defproc[(ollama-start-chat [c ollama-client?]
                             [model string?]
-                            [str-or-message (or/c string? message?)]
+                            [str-or-message (or/c string? message? (listof (or/c string? message?)))]
                             [#:options options jsexpr? (hasheq)]
                             [#:format output-format (or/c #f string?) #f]
                             [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f]
