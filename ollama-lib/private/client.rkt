@@ -7,6 +7,7 @@
          struct-define
          threading
          "json.rkt"
+         "lens.rkt"
          "message.rkt"
          "tool.rkt")
 
@@ -38,7 +39,9 @@
          #:response->history-entry
          [response->history-entry
           (lambda (data)
-            (hash-ref data 'message))]
+            (make-message
+             #:role 'assistant
+             (&content data)))]
          c model str-or-message)
   (struct-define ollama-client c)
   (let loop ([messages (treelist (ensure-message str-or-message))]
@@ -65,17 +68,25 @@
           (check-response 'ollama-chat _)))
     (let ([messages (treelist-copy messages)])
       (values
-       (lambda ()
-         (define data (read-json (response-output resp)))
-         (cond
-           [(eof-object? data)
-            (begin0 eof
-              (response-close! resp))]
-           [else
-            (define llm-message
-              (response->history-entry data))
-            (begin0 data
-              (mutable-treelist-add! messages llm-message))]))
+       (let ([done? #f]
+             [parts (mutable-treelist)])
+         (lambda ()
+           (define data (read-json (response-output resp)))
+           (cond
+             [(eof-object? data)
+              (unless done?
+                (set! done? #t)
+                (define complete-message
+                  (message-parts->complete-message parts))
+                (unless (string=? (&content complete-message) "")
+                  (and~>
+                   (response->history-entry complete-message)
+                   (mutable-treelist-add! messages _))))
+              (begin0 eof
+                (response-close! resp))]
+             [else
+              (begin0 data
+                (mutable-treelist-add! parts data))])))
        (lambda (#:format [output-format output-format] ;; noqa
                 #:tools [tools tools] ;; noqa
                 next-message)

@@ -21,7 +21,7 @@
         [#:options jsexpr?
          #:format (or/c #f 'json jsexpr?)
          #:tools (or/c #f (hash/c symbol? tool-info?))
-         #:response->history-entry (-> jsexpr? (or/c jsexpr? message?))]
+         #:response->history-entry (-> jsexpr? (or/c #f message?))]
         (values
          chat-response/c
          chat-continuation/c))])

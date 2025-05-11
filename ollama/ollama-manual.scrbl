@@ -42,8 +42,11 @@ bindings documented here are subject to change.}
                             [#:format output-format (or/c #f string?) #f]
                             [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f]
                             [#:response->history-entry response-converter
-                             (-> jsexpr? (or/c jsexpr? message?))
-                             (λ (data) (hash-ref data 'message))])
+                             (-> jsexpr? (or/c #f message?))
+                             (λ (data)
+                               (make-message
+                                #:role 'assistant
+                                (hash-ref (hash-ref data 'message) 'content)))])
          (values
           chat-response/c
           chat-continuation/c)]{
@@ -73,7 +76,7 @@ bindings documented here are subject to change.}
 
  The @racket[#:response->history-entry] procedure can be used to alter
  LLM responses before they're committed to history. For example, you
- can use this hook to filter out reasoning form an LLM response.
+ can use this hook to filter out reasoning from an LLM response.
 }
 
 @defthing[#:kind "contract"

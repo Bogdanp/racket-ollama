@@ -6,5 +6,6 @@
 (define deps
   '("base"
     "http-easy-lib"
+    "monocle-lib"
     "struct-define"
     "threading-lib"))
