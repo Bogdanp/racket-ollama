@@ -103,7 +103,7 @@ bindings documented here are subject to change.}
 }
 
 @defproc[(make-message [content string?]
-                       [#:role role (or/c 'system 'user 'tool) 'user]
+                       [#:role role (or/c 'assistant 'system 'user 'tool) 'user]
                        [#:images images (listof bytes?) null])
          message?]{
  Creates a new message with the given @racket[content] and

@@ -30,7 +30,7 @@
  (contract-out
   [make-message
    (->* [string?]
-        [#:role (or/c 'system 'user 'tool)
+        [#:role (or/c 'assistant 'system 'user 'tool)
          #:images (listof bytes?)]
         message?)])
 
