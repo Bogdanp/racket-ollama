@@ -40,7 +40,10 @@ bindings documented here are subject to change.}
                             [str-or-message (or/c string? message?)]
                             [#:options options jsexpr? (hasheq)]
                             [#:format output-format (or/c #f string?) #f]
-                            [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f])
+                            [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f]
+                            [#:response->history-entry response-converter
+                             (-> jsexpr? (or/c string? jsexpr? message?))
+                             (λ (data) (hash-ref data 'message))])
          (values
           chat-response/c
           chat-continuation/c)]{
@@ -67,6 +70,10 @@ bindings documented here are subject to change.}
 
  The @racket[#:tools] argument can be used to supply the LLM with
  tools that it can call to perform actions.
+
+ The @racket[#:response->history-entry] procedure can be used to alter
+ LLM responses before they're committed to history. For example, you
+ can use this hook to filter out reasoning form an LLM response.
 }
 
 @defthing[#:kind "contract"

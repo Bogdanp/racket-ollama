@@ -35,6 +35,10 @@
          #:options [options (hasheq)]
          #:format [output-format #f]
          #:tools [tools #f]
+         #:response->history-entry
+         [response->history-entry
+          (lambda (data)
+            (hash-ref data 'message))]
          c model str-or-message)
   (struct-define ollama-client c)
   (let loop ([messages (treelist (ensure-message str-or-message))]
@@ -68,7 +72,8 @@
             (begin0 eof
               (response-close! resp))]
            [else
-            (define llm-message (hash-ref data 'message))
+            (define llm-message
+              (response->history-entry data))
             (begin0 data
               (mutable-treelist-add! messages llm-message))]))
        (lambda (#:format [output-format output-format] ;; noqa
