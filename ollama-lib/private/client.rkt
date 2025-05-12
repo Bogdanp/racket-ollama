@@ -47,6 +47,8 @@
   (let loop ([messages (ensure-messages str-or-messages)]
              [output-format output-format]
              [tools tools])
+    (define done? #f)
+    (define parts (mutable-treelist))
     (define resp
       (~> (session-request
            #:method 'post
@@ -68,25 +70,23 @@
           (check-response 'ollama-chat _)))
     (let ([messages (treelist-copy messages)])
       (values
-       (let ([done? #f]
-             [parts (mutable-treelist)])
-         (lambda ()
-           (define data (read-json (response-output resp)))
-           (cond
-             [(eof-object? data)
-              (unless done?
-                (set! done? #t)
-                (define complete-message
-                  (message-parts->complete-message parts))
-                (unless (string=? (&content complete-message) "")
-                  (and~>
-                   (response->history-entry complete-message)
-                   (mutable-treelist-add! messages _))))
-              (begin0 eof
-                (response-close! resp))]
-             [else
-              (begin0 data
-                (mutable-treelist-add! parts data))])))
+       (lambda ()
+         (define data (read-json (response-output resp)))
+         (cond
+           [(eof-object? data)
+            (unless done?
+              (set! done? #t)
+              (define complete-message
+                (message-parts->complete-message parts))
+              (unless (string=? (&content complete-message) "")
+                (and~>
+                 (response->history-entry complete-message)
+                 (mutable-treelist-add! messages _))))
+            (begin0 eof
+              (response-close! resp))]
+           [else
+            (begin0 data
+              (mutable-treelist-add! parts data))]))
        (lambda (#:format [output-format output-format] ;; noqa
                 #:tools [tools tools] ;; noqa
                 next-message)
