@@ -91,14 +91,9 @@
                 #:tools [tools tools] ;; noqa
                 next-message)
          (if (list? next-message)
-             (mutable-treelist-append! messages (list->treelist next-message))
+             (mutable-treelist-append! messages (ensure-messages next-message))
              (mutable-treelist-add! messages (ensure-message next-message)))
          (loop (mutable-treelist-snapshot messages) output-format tools))))))
-
-(define (ensure-message str-or-message)
-  (if (message? str-or-message)
-      str-or-message
-      (make-message str-or-message)))
 
 (define (ensure-messages str-or-messages)
   (cond
@@ -108,6 +103,11 @@
      (treelist str-or-messages)]
     [else
      (treelist (make-message str-or-messages))]))
+
+(define (ensure-message str-or-message)
+  (if (message? str-or-message)
+      str-or-message
+      (make-message str-or-message)))
 
 (define (check-response who resp [ok '(200)])
   (begin0 resp

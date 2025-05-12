@@ -56,7 +56,7 @@
   (-> (or/c jsexpr? eof-object?)))
 
 (define chat-continuation/c
-  (->* [(or/c string? message? (listof message?))]
+  (->* [(or/c string? message? (listof (or/c string? message?)))]
        [#:format (or/c #f 'json jsexpr?)
         #:tools (or/c #f (hash/c symbol? tool-info?))]
        (values

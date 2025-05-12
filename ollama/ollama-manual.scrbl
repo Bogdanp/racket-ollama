@@ -37,7 +37,7 @@ bindings documented here are subject to change.}
 
 @defproc[(ollama-start-chat [c ollama-client?]
                             [model string?]
-                            [str-or-message (or/c string? message? (listof (or/c string? message?)))]
+                            [str-or-messages (or/c string? message? (listof (or/c string? message?)))]
                             [#:options options jsexpr? (hasheq)]
                             [#:format output-format (or/c #f string?) #f]
                             [#:tools tools (or/c #f (hash/c symbol? tool-info?)) #f]
@@ -51,7 +51,7 @@ bindings documented here are subject to change.}
           chat-response/c
           chat-continuation/c)]{
  Starts a chat with @racket[model] via @racket[c] by sending it
- @racket[str-or-message]. Returns a pair of procedures:
+ @racket[str-or-messages]. Returns a pair of procedures:
 
  @itemlist[
  @item{A procedure to return the next part of the model's
@@ -72,11 +72,13 @@ bindings documented here are subject to change.}
  encourage it to do so in your message).
 
  The @racket[#:tools] argument can be used to supply the LLM with
- tools that it can call to perform actions.
+ @tech{tools} that it can call to perform actions.
 
  The @racket[#:response->history-entry] procedure can be used to alter
- LLM responses before they're committed to history. For example, you
- can use this hook to filter out reasoning from an LLM response.
+ LLM responses before they're committed to history. For example, you can
+ use this hook to filter out reasoning from an LLM response. When the
+ result of applying this procedure is @racket[#f], no entry is stored
+ for that response.
 }
 
 @defthing[#:kind "contract"
@@ -87,7 +89,7 @@ bindings documented here are subject to change.}
 
 @defthing[#:kind "contract"
           chat-continuation/c
-          (->* [(or/c string? message? (listof message?))]
+          (->* [(or/c string? message? (listof (or/c string? message?)))]
                [#:format (or/c #f 'json jsexpr?)
                 #:tools (or/c #f (hash/c symbol? tool-info?))]
                (values
