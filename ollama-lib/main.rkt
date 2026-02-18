@@ -1,10 +1,10 @@
 #lang racket/base
 
-(require net/http-easy
+(require json
+         net/http-easy
          racket/contract/base
          "private/client.rkt"
          "private/json-schema.rkt"
-         "private/json.rkt"
          "private/message.rkt"
          "private/tool.rkt")
 
@@ -45,12 +45,7 @@
  exn:fail:tool?
  exn:fail:tool:not-found?
  exn:fail:tool:call?
- raise-tool-error
-
- gen:to-jsexpr
- to-jsexpr?
- ->jsexpr
- tools->jsexpr)
+ raise-tool-error)
 
 (define chat-response/c
   (-> (or/c jsexpr? eof-object?)))

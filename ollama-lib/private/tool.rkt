@@ -2,11 +2,13 @@
 
 (require (for-syntax racket/base
                      syntax/parse/pre)
+         json
+         json/to-jsexpr
+         racket/generic
          racket/port
          struct-define
          threading
-         "json-schema.rkt"
-         "json.rkt")
+         "json-schema.rkt")
 
 (provide
  (all-from-out "json-schema.rkt")
@@ -16,7 +18,6 @@
  :
  Object
  define-tool-definer
- tools->jsexpr
 
  raise-tool-error
  (struct-out exn:fail:tool)
@@ -57,7 +58,27 @@
      #'(Object* (list (cons 'k t) ...))]))
 
 (struct tool-arg-info (id label type))
-(struct tool-info (id description examples proc args))
+(struct tool-info (id description examples proc args)
+  #:methods gen:to-jsexpr
+  [(define (->jsexpr t)
+     (struct-define tool-info t)
+     (hasheq
+      'type "function"
+      'examples (for/list ([example (in-list examples)])
+                  (cond
+                    [(string? example) example]
+                    [else (call-with-output-string
+                           (lambda (out)
+                             (write example out)))]))
+      'description description
+      'function
+      (hasheq
+       'name (symbol->string id)
+       'parameters
+       (Object*
+        (for/list ([arg (in-list args)])
+          (struct-define tool-arg-info arg)
+          (cons label type))))))])
 
 (begin-for-syntax
   (define-syntax-class arg
@@ -130,26 +151,3 @@
       (apply proc arg-vals)))
   (jsexpr->string
    (hash-set data 'result (->jsexpr res))))
-
-(define (tool->jsexpr t)
-  (struct-define tool-info t)
-  (hasheq
-   'type "function"
-   'examples (for/list ([example (in-list examples)])
-               (cond
-                 [(string? example) example]
-                 [else (call-with-output-string
-                        (lambda (out)
-                          (write example out)))]))
-   'description description
-   'function
-   (hasheq
-    'name (symbol->string id)
-    'parameters
-    (Object*
-     (for/list ([arg (in-list args)])
-       (struct-define tool-arg-info arg)
-       (cons label type))))))
-
-(define (tools->jsexpr tools)
-  (map tool->jsexpr (hash-values tools)))

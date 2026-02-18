@@ -9,7 +9,8 @@
   '("http-easy"
     "http-easy-lib"
     "racket-doc"
-    "scribble-lib"))
+    "scribble-lib"
+    "to-jsexpr"))
 (define implies
   '("ollama-lib"))
 (define scribblings

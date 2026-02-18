@@ -8,4 +8,5 @@
     "http-easy-lib"
     "monocle-lib"
     "struct-define"
-    "threading-lib"))
+    "threading-lib"
+    "to-jsexpr-lib"))

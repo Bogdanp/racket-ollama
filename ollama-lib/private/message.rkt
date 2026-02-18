@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require "json.rkt")
+(require json/to-jsexpr)
 
 (provide
  (struct-out message)
@@ -9,7 +9,8 @@
 (struct message (role content images tool-calls)
   #:transparent
   #:methods gen:to-jsexpr
-  [(define-struct->jsexpr message)])
+  [(define-struct->jsexpr message
+     #:convention snake_case-convention)])
 
 (define (make-message
          #:role [role 'user]

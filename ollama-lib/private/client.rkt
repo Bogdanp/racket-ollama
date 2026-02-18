@@ -1,12 +1,13 @@
 #lang racket/base
 
-(require net/http-easy
+(require json
+         json/to-jsexpr
+         net/http-easy
          racket/mutable-treelist
          racket/string
          racket/treelist
          struct-define
          threading
-         "json.rkt"
          "lens.rkt"
          "message.rkt"
          "tool.rkt")
@@ -60,7 +61,7 @@
                    'options options
                    'messages (->jsexpr messages)
                    'tools (if tools
-                              (tools->jsexpr tools)
+                              (->jsexpr (hash-values tools))
                               (json-null))
                    'format (if output-format
                                (->jsexpr output-format)

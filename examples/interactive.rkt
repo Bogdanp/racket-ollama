@@ -41,7 +41,7 @@
                (cond
                  [(null? calls)
                   (begin0 tool-calls
-                    (display (hash-ref message 'content)))]
+                    (display content))]
                  [else
                   (append tool-calls calls)])))
            (cond

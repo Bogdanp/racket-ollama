@@ -2,6 +2,7 @@
 
 @(require scribble/example
           (for-label json
+                     json/to-jsexpr
                      net/http-easy
                      ollama
                      racket/base
@@ -215,19 +216,4 @@ bindings documented here are subject to change.}
  Raise a tool error with the given format and hints. The
  @racket[#:hints] argument can be used to provide a list of strings to
  instruct the LLM on how to recover.
-}
-
-@subsection{JSON}
-
-@defidform[#:kind "interface" gen:to-jsexpr]{
- An interface for values that can be converted to JSON.
-}
-
-@defproc[(to-jsexpr? [v any/c]) boolean?]{
- Returns @racket[#t] when @racket[v] implements @racket[gen:to-jsexpr].
-}
-
-@defproc[(->jsexpr [v to-jsexpr?]) jsexpr?]{
- Converts @racket[v] to a @racket[jsexpr?], assuming @racket[v]
- implements @racket[gen:to-jsexpr].
 }
