@@ -57,7 +57,7 @@
            #:auth auth
            #:json (hasheq
                    'model model
-                   'stream (not tools)
+                   'stream #t
                    'options options
                    'messages (->jsexpr messages)
                    'tools (if tools
